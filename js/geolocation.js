@@ -1,4 +1,4 @@
-(function (geolocation) {
+п»ї(function (geolocation) {
 	window.geolocation = window.geolocation || {MIN_ACCURACY: 0, NOT_MAX_ACCURACY: 1, MAX_ACCURACY: 2};
 	window.geolocation.getCurrentPosition = function () {		
 		var onSuccess = (typeof arguments[0] === 'function') ? arguments[0] : function () {},
@@ -99,6 +99,6 @@
 		}	
 	};	
 	var handleNoGeolocation = function () {
-		alert('Ваш браузер не поддерживает геолокацию');
+		alert('Р’Р°С€ Р±СЂР°СѓР·РµСЂ РЅРµ РїРѕРґРґРµСЂР¶РёРІР°РµС‚ РіРµРѕР»РѕРєР°С†РёСЋ');
 	};
 }(navigator.geolocation));
