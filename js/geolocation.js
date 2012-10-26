@@ -5,7 +5,6 @@
 			onError = (typeof arguments[1] === 'function') ? arguments[1] : function () {},
 			options = (typeof arguments[1] !== 'function') ? (arguments[1] || {}) : (arguments[2] || {}),
 			identifier = null;
-		options.numberOfTriesForBestResult = options.numberOfTriesForBestResult || 1;
 		options.maxAccuracy = options.maxAccuracy || 100;
 		if (geolocation) {
 			if (options.enableHighAccuracy) {
@@ -61,11 +60,7 @@
 					geolocation.clearWatch(watchId);
 					clearTimeout(setTimeoutId);
 					onSuccess(position); 
-				} else if (counter > options.numberOfTriesForBestResult) {
-					geolocation.clearWatch(watchId);
-					clearTimeout(setTimeoutId);
-				} 
-				counter++;
+				}
 			}, 
 			function (error) {
 				clearTimeout(setTimeoutId);
