@@ -28,7 +28,7 @@
 				);
 			}
 		} else {
-			handleNoGeolocation();
+			onError({UNKNOWN_ERROR: 0, PERMISSION_DENIED: 1, POSITION_UNAVAILABLE: 2, TIMEOUT: 3, code: 4});
 		}
 		return identifier;
 	};	
