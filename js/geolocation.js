@@ -2,7 +2,7 @@
 	window.geolocation = window.geolocation || {MIN_ACCURACY: 0, NOT_MAX_ACCURACY: 1, MAX_ACCURACY: 2};
 	window.geolocation.getCurrentPosition = function () {		
 		var onSuccess = (typeof arguments[0] === 'function') ? arguments[0] : function () {},
-			onError = (typeof arguments[1] === 'function') ? arguments[1] : function () {},
+			onError = (typeof arguments[1] === 'function') ? arguments[1] : defaultErrorHandler,
 			options = (typeof arguments[1] !== 'function') ? (arguments[1] || {}) : (arguments[2] || {}),
 			identifier = null;
 		options.maxAccuracy = options.maxAccuracy || 100;
@@ -12,12 +12,12 @@
 					function (highPosition) {
 						onSuccess(highPosition, window.geolocation.MAX_ACCURACY);
 					},
-					function (error) {
-						getLowAccuracyPosition(
-							function (lowPosition) {
-								onSuccess(lowPosition, window.geolocation.NOT_MAX_ACCURACY);
-							}, onError, options
-						);
+					function (error, lowPosition) {
+						if (lowPosition != null) {
+							onSuccess(lowPosition, window.geolocation.NOT_MAX_ACCURACY);
+						} else {
+							onError(error);
+						}
 					}, options
 				);
 			} else {
@@ -43,41 +43,36 @@
 			function (position) {
 				onSuccess(position); 
 			},
-			function (error) {
-				if (typeof onError === 'function') { 
-					onError(error); 
-				} else {
-					handleError(error);
-				}
-			}, options
+			onError, options
 		);
 	};	
 	var getHighAccuracyPosition = function (onSuccess, onTimeoutError, options) {
-		var counter = 0, watchId = setTimeoutId = null;
-		watchId = geolocation.watchPosition(
+		var lowPosition = null;
+		var watchId = geolocation.watchPosition(
 			function (position) {
 				if (position.coords.accuracy < options.maxAccuracy) {
 					geolocation.clearWatch(watchId);
 					clearTimeout(setTimeoutId);
 					onSuccess(position); 
 				}
+				lowPosition = position;
 			}, 
 			function (error) {
 				clearTimeout(setTimeoutId);
 				if (error.code == error.TIMEOUT) {
-					onTimeoutError(error);
-				} else {
-					handleError(error);
-				}
+					onTimeoutError(error, lowPosition);
+				} 
 			}, options
 		);
-		setTimeoutId = setTimeout(function () { 
-			geolocation.clearWatch(watchId); 
-			onTimeoutError({PERMISSION_DENIED: 1, POSITION_UNAVAILABLE: 2, TIMEOUT: 3, code: 3}); 
-		}, options.timeout + 1000);
+		var setTimeoutId = setTimeout(
+			function () { 
+				geolocation.clearWatch(watchId); 
+				onTimeoutError({UNKNOWN_ERROR: 0, PERMISSION_DENIED: 1, POSITION_UNAVAILABLE: 2, TIMEOUT: 3, code: 3}, lowPosition); 
+			}, options.timeout + 1000
+		);
 		return {watchId: watchId, setTimeoutId: setTimeoutId};
 	};	
-	var handleError = function (error) {
+	var defaultErrorHandler = function (error) {
 		switch (error.code)	{
 			case error.PERMISSION_DENIED:
 				alert("User denied the request for Geolocation.");
@@ -91,9 +86,9 @@
 			case error.UNKNOWN_ERROR:
 				alert("An unknown error occurred.");
 				break;
+			case 4:
+				alert("Geolocation is not supported");
+				break;
 		}	
 	};	
-	var handleNoGeolocation = function () {
-		alert('Ваш браузер не поддерживает геолокацию');
-	};
 }(navigator.geolocation));
