@@ -46,7 +46,7 @@
 			onError, options
 		);
 	};	
-	var getHighAccuracyPosition = function (onSuccess, onTimeoutError, options) {
+	var getHighAccuracyPosition = function (onSuccess, onError, options) {
 		var lowPosition = null;
 		var watchId = geolocation.watchPosition(
 			function (position) {
@@ -59,15 +59,13 @@
 			}, 
 			function (error) {
 				clearTimeout(setTimeoutId);
-				if (error.code == error.TIMEOUT) {
-					onTimeoutError(error, lowPosition);
-				} 
+				onError(error, lowPosition);
 			}, options
 		);
 		var setTimeoutId = setTimeout(
 			function () { 
 				geolocation.clearWatch(watchId); 
-				onTimeoutError({UNKNOWN_ERROR: 0, PERMISSION_DENIED: 1, POSITION_UNAVAILABLE: 2, TIMEOUT: 3, code: 3}, lowPosition); 
+				onError({UNKNOWN_ERROR: 0, PERMISSION_DENIED: 1, POSITION_UNAVAILABLE: 2, TIMEOUT: 3, code: 3}, lowPosition); 
 			}, options.timeout + 1000
 		);
 		return {watchId: watchId, setTimeoutId: setTimeoutId};
