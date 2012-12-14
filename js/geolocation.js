@@ -59,6 +59,7 @@
 			}, 
 			function (error) {
 				clearTimeout(setTimeoutId);
+				geolocation.clearWatch(watchId);
 				onError(error, lowPosition);
 			}, options
 		);
