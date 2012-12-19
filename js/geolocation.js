@@ -1,4 +1,4 @@
-﻿(function (geolocation) {
+(function (geolocation) {
 	window.geolocation = window.geolocation || {MIN_ACCURACY: 0, NOT_MAX_ACCURACY: 1, MAX_ACCURACY: 2};
 	window.geolocation.getCurrentPosition = function () {		
 		var onSuccess = (typeof arguments[0] === 'function') ? arguments[0] : function () {},
