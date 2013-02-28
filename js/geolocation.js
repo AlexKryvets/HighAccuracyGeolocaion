@@ -46,31 +46,35 @@
 			onError, options
 		);
 	};	
-	var getHighAccuracyPosition = function (onSuccess, onError, options) {
+	var getHighAccuracyPosition = (function () {
 		var lowPosition = null;
-		var watchId = geolocation.watchPosition(
-			function (position) {
-				if (position.coords.accuracy < options.maxAccuracy) {
-					geolocation.clearWatch(watchId);
+		return function (onSuccess, onError, options) {
+			var watchId = geolocation.watchPosition(
+				function (position) {
+					if (position.coords.accuracy < options.maxAccuracy) {
+						clearTimeout(setTimeoutId);
+						onSuccess(position);
+						geolocation.clearWatch(watchId);
+						lowPosition = null;
+					}
+					lowPosition = position;
+				}, 
+				function (error) {
 					clearTimeout(setTimeoutId);
-					onSuccess(position); 
-				}
-				lowPosition = position;
-			}, 
-			function (error) {
-				clearTimeout(setTimeoutId);
-				geolocation.clearWatch(watchId);
-				onError(error, lowPosition);
-			}, options
-		);
-		var setTimeoutId = setTimeout(
-			function () { 
-				geolocation.clearWatch(watchId); 
-				onError({UNKNOWN_ERROR: 0, PERMISSION_DENIED: 1, POSITION_UNAVAILABLE: 2, TIMEOUT: 3, code: 3}, lowPosition); 
-			}, options.timeout + 1000
-		);
-		return {watchId: watchId, setTimeoutId: setTimeoutId};
-	};	
+					onError(error, lowPosition);
+					geolocation.clearWatch(watchId);
+				}, options
+			);
+			var setTimeoutId = setTimeout(
+				function () { 
+					geolocation.clearWatch(watchId);
+					console.log(lowPosition);
+					onError({UNKNOWN_ERROR: 0, PERMISSION_DENIED: 1, POSITION_UNAVAILABLE: 2, TIMEOUT: 3, code: 3}, lowPosition);
+				}, options.timeout + 1000
+			);
+			return {watchId: watchId, setTimeoutId: setTimeoutId};
+		};	
+	}());
 	var defaultErrorHandler = function (error) {
 		switch (error.code)	{
 			case error.PERMISSION_DENIED:
